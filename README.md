@@ -23,11 +23,11 @@ A sample project demonstrating the new document launch experience in iOS 18, sho
 
 ### Text Documents
 - Plain text files with basic editing capabilities
-- File extension: `.txt`
+- File extension: `.exampletext`
 
 ### Rich Documents
 - Rich text format with enhanced formatting options
-- File extension: `.rtf`
+- File extension: `.sampledoc`
 
 ## Implementation Highlights
 
@@ -46,7 +46,6 @@ Each document type (`TextDocument` and `RichDocument`) includes:
 - Built-in undo management
 - Auto-save functionality
 - Custom UI for editing
-- State restoration
 
 ### Mac Catalyst Support
 
