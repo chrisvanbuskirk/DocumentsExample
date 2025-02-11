@@ -8,7 +8,8 @@ import UIKit
 
 /// A custom document view controller that lets you choose the type of document to manage.
 class CustomDocumentViewController: UIDocumentViewController, UITextViewDelegate {
-    
+    var documentWindows: [UIWindow] = []
+
     // A text view that will display either the rich or plain text content.
     private let textView: UITextView = {
         let tv = UITextView()
@@ -136,27 +137,45 @@ class CustomDocumentViewController: UIDocumentViewController, UITextViewDelegate
 // Mark: UIDocumentBrowserViewController Delegate
 extension CustomDocumentViewController: UIDocumentBrowserViewControllerDelegate {
     
-    func documentBrowser(_ controller: UIDocumentBrowserViewController, didPickDocumentsAt documentURLs: [URL]) {
-        guard let url = documentURLs.first else { return }
-        
-        // Create the appropriate document type based on file extension
-        let document: UIDocument
-        if url.pathExtension == "exampletext" {
-            document = TextDocument(fileURL: url)
-        } else if url.pathExtension == "sampledoc" {
-            document = RichDocument(fileURL: url)
-        } else {
-            print("Unsupported file type")
-            return
-        }
-        
-        // Create and present the document view controller
-        let documentViewController = CustomDocumentViewController()
-        documentViewController.document = document
-        let navigationController = UINavigationController(rootViewController: documentViewController)
-        navigationController.modalPresentationStyle = .fullScreen
-        controller.present(navigationController, animated: true)
-    }
+       
+   func documentBrowser(_ controller: UIDocumentBrowserViewController, didPickDocumentsAt documentURLs: [URL]) {
+       for url in documentURLs {
+           // Create the appropriate document type based on file extension
+           let document: UIDocument
+           if url.pathExtension == "exampletext" {
+               document = TextDocument(fileURL: url)
+           } else if url.pathExtension == "sampledoc" {
+               document = RichDocument(fileURL: url)
+           } else {
+               print("Unsupported file type: \(url.pathExtension)")
+               continue
+           }
+           
+           // Create the document view controller
+           let documentViewController = CustomDocumentViewController()
+           documentViewController.document = document
+           let navigationController = UINavigationController(rootViewController: documentViewController)
+           navigationController.modalPresentationStyle = .fullScreen
+           
+           // Check if running on macCatalyst
+           #if targetEnvironment(macCatalyst)
+           // Request a new window scene
+           let activity = NSUserActivity(activityType: "com.yourapp.document")
+           activity.userInfo = ["documentURL": url]
+           
+           UIApplication.shared.requestSceneSessionActivation(
+               nil,
+               userActivity: activity,
+               options: nil
+           ) { error in
+               print("Failed to open window: \(error)")
+           }
+           #else
+           // On iOS, present modally in the same window
+           controller.present(navigationController, animated: true)
+           #endif
+       }
+   }
     
     func documentBrowser(_ controller: UIDocumentBrowserViewController, didRequestDocumentCreationWithHandler importHandler: @escaping (URL?, UIDocumentBrowserViewController.ImportMode) -> Void) {
         switch controller.activeDocumentCreationIntent {

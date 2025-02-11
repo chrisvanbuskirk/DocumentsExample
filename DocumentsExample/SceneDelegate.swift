@@ -12,17 +12,37 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
 
 
     func scene(_ scene: UIScene, willConnectTo session: UISceneSession, options connectionOptions: UIScene.ConnectionOptions) {
-        // Use this method to optionally configure and attach the UIWindow `window` to the provided UIWindowScene `scene`.
-        // This delegate does not imply the connecting scene or session are new (see `application:configurationForConnectingSceneSession` instead).
         guard let windowScene = scene as? UIWindowScene else { return }
-
+        
         window = UIWindow(windowScene: windowScene)
-        let documentViewController = CustomDocumentViewController()
-        let navigationController = UINavigationController(rootViewController: documentViewController)
-        window?.rootViewController = navigationController
+        
+        // Check if this is a document window
+        if let activity = connectionOptions.userActivities.first,
+           let documentURL = activity.userInfo?["documentURL"] as? URL {
+            // Create document view controller
+            let document: UIDocument
+            if documentURL.pathExtension == "exampletext" {
+                document = TextDocument(fileURL: documentURL)
+            } else if documentURL.pathExtension == "sampledoc" {
+                document = RichDocument(fileURL: documentURL)
+            } else {
+                return
+            }
+            
+            let documentViewController = CustomDocumentViewController()
+            documentViewController.document = document
+            let navigationController = UINavigationController(rootViewController: documentViewController)
+            window?.rootViewController = navigationController
+        } else {
+            // This is the initial window
+            let documentViewController = CustomDocumentViewController()
+            let navigationController = UINavigationController(rootViewController: documentViewController)
+            window?.rootViewController = navigationController
+        }
+        
         window?.makeKeyAndVisible()
     }
-
+    
     func sceneDidDisconnect(_ scene: UIScene) {
         // Called as the scene is being released by the system.
         // This occurs shortly after the scene enters the background, or when its session is discarded.
