@@ -17,22 +17,27 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         window = UIWindow(windowScene: windowScene)
         
         // Check if this is a document window
-        if let activity = connectionOptions.userActivities.first,
-           let documentURL = activity.userInfo?["documentURL"] as? URL {
-            // Create document view controller
-            let document: UIDocument
-            if documentURL.pathExtension == "exampletext" {
-                document = TextDocument(fileURL: documentURL)
-            } else if documentURL.pathExtension == "sampledoc" {
-                document = RichDocument(fileURL: documentURL)
-            } else {
-                return
+        if let activity = connectionOptions.userActivities.first {
+            if activity.userInfo?["isNewDocument"] as? Bool == true {
+                // Handle new document
+                let navigationController = UINavigationController(rootViewController: TemplatePickerViewController())
+                window?.rootViewController = navigationController
+            } else if let documentURL = activity.userInfo?["documentURL"] as? URL {
+                // Handle existing document
+                let document: UIDocument
+                if documentURL.pathExtension == "exampletext" {
+                    document = TextDocument(fileURL: documentURL)
+                } else if documentURL.pathExtension == "sampledoc" {
+                    document = RichDocument(fileURL: documentURL)
+                } else {
+                    return
+                }
+                
+                let documentViewController = CustomDocumentViewController()
+                documentViewController.document = document
+                let navigationController = UINavigationController(rootViewController: documentViewController)
+                window?.rootViewController = navigationController
             }
-            
-            let documentViewController = CustomDocumentViewController()
-            documentViewController.document = document
-            let navigationController = UINavigationController(rootViewController: documentViewController)
-            window?.rootViewController = navigationController
         } else {
             // This is the initial window
             let documentViewController = CustomDocumentViewController()

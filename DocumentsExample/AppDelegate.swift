@@ -30,6 +30,42 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         // Use this method to release any resources that were specific to the discarded scenes, as they will not return.
     }
 
+    // We are intercepting the new file menu item to show the template picker
+    override func buildMenu(with builder: UIMenuBuilder) {
+        super.buildMenu(with: builder)
+        
+        // Remove the default New menu item
+        builder.remove(menu: .newScene)
+        
+        // Add our custom New menu item
+        let newCommand = UIKeyCommand(
+            title: "New",
+            action: #selector(newDocument(_:)),
+            input: "N",
+            modifierFlags: .command)
+        
+        let newMenu = UIMenu(
+            title: "New",
+            image: nil,
+            identifier: UIMenu.Identifier("com.touchedmedia.documents"),
+            options: [],
+            children: [newCommand])
+        
+        builder.insertChild(newMenu, atStartOfMenu: .file)
+    }
 
+    @objc func newDocument(_ sender: Any) {
+        // Request a new window scene
+        let activity = NSUserActivity(activityType: "com.touchedmedia.documents")
+        activity.userInfo = ["isNewDocument": true]
+            
+        UIApplication.shared.requestSceneSessionActivation(
+            nil,
+            userActivity: activity,
+            options: nil
+        ) { error in
+            print("Failed to open new window: \(error)")
+        }
+    }
 }
 
