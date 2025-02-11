@@ -8,7 +8,6 @@ import UIKit
 
 /// A custom document view controller that lets you choose the type of document to manage.
 class CustomDocumentViewController: UIDocumentViewController, UITextViewDelegate {
-    var documentWindows: [UIWindow] = []
 
     // A text view that will display either the rich or plain text content.
     private let textView: UITextView = {
@@ -160,7 +159,7 @@ extension CustomDocumentViewController: UIDocumentBrowserViewControllerDelegate 
            // Check if running on macCatalyst
            #if targetEnvironment(macCatalyst)
            // Request a new window scene
-           let activity = NSUserActivity(activityType: "com.yourapp.document")
+           let activity = NSUserActivity(activityType: "com.touchedmedia.documents")
            activity.userInfo = ["documentURL": url]
            
            UIApplication.shared.requestSceneSessionActivation(

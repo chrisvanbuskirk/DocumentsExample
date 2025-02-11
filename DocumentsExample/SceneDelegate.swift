@@ -43,6 +43,23 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         window?.makeKeyAndVisible()
     }
     
+    // Open Recents
+    func scene(_ scene: UIScene, openURLContexts URLContexts: Set<UIOpenURLContext>) {
+        guard let url = URLContexts.first?.url else { return }
+        
+        // Request a new window scene for the document
+        let activity = NSUserActivity(activityType: "com.touchedmedia.documents")
+        activity.userInfo = ["documentURL": url]
+            
+        UIApplication.shared.requestSceneSessionActivation(
+            nil,
+            userActivity: activity,
+            options: nil
+        ) { error in
+            print("Failed to open window: \(error)")
+        }
+    }
+    
     func sceneDidDisconnect(_ scene: UIScene) {
         // Called as the scene is being released by the system.
         // This occurs shortly after the scene enters the background, or when its session is discarded.
